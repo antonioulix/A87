@@ -1,0 +1,289 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define MAX 500
+
+typedef struct {
+	int code;
+	char firstname [20];
+	char lastname [20];
+	float balance;
+} account;
+
+account acc[MAX];
+int n; //dichiarata come globale per poterla richiamare nelle funzioni
+
+void printMenu();
+void writeData(account a[]);
+int readData(account a[]);
+//void testFunction(account a[]);
+void printArray(account a[], int dim);
+void ordinaVettore(account a[], int dim);
+void saveArray(account a[], int dim);
+void ricerca(account a[], int dim);
+void elimina(account a[], int dim);
+
+int main(){
+	printf("*** Programma per la gestione dei conti tramite file ad accesso sequenziale. ***\n\n");
+	n = readData(acc);
+	int choice=32;
+	printMenu (); 
+	while (choice!=0){
+		scanf("%d", &choice);
+		fflush(stdin);
+		switch(choice){
+			case 1:
+			writeData(acc);
+			break;
+			case 2:
+			n = readData(acc);
+			printf("Dati acquisiti correttamente da file.\n");
+			break;
+			case 3:
+			ordinaVettore(acc, n);
+			break;
+			case 4:
+			ricerca(acc, n);
+			break;
+			case 5:
+			printArray(acc, n);
+			break;
+			case 6:
+			saveArray(acc, n);
+			break;
+			case 7:
+			elimina(acc, n);
+			break;
+			case 8:
+			printf("Dimensione dell'array: %d elementi (%d byte).\n", n, n*sizeof(acc[n]));
+			break;
+			case 9:
+			printMenu();
+			break;
+			case 0:
+			printf("Uscita dal programma...\n");
+			break;
+			default:
+			printf("Operazione non valida.\n");
+		}	
+	}
+
+	system("pause");
+	return 0;
+}
+
+void printMenu(){
+printf ("   **** MENU ****:\n"
+	"1. Inserisci nuovi dati su file account_data.txt.\n"
+	"2. Acquisisci in memoria l'array da file (senza visualizzarlo).\n"
+	"3. Ordina i dati dell'array per bilancio e, se uguale, per cognome.\n"
+	"4. Visualizza i bilanci maggiori o uguali a una cifra inserita in input.\n"
+	"5. Visualizza l'array in memoria.\n"
+	"6. Salva l'array in memoria su un nuovo file.\n"
+	"7. Elimina un elemento dal file account_data.txt\n"
+	"8. Visualizza la dimensione dell'array in memoria.\n"
+	"9. Torna al men\x97 principale\n"
+	"0. Esci dal programma.\n\n");
+}
+
+void writeData(account a[]){ //funzione che scrive i dati su file
+	FILE *fp1;
+	if( (fp1=fopen("account_data.txt", "a") ) == NULL) {
+		printf("Errore nell'apertura del file.\n");
+	}
+	else{
+		int i=n;
+		char c='s';
+		while ((c!='n') && (c!='N')){
+			printf("Inserisci codice del conto, nome, cognome e bilancio, separati da spazio:\n");
+			scanf("%d" "%s" "%s" "%f", &a[i].code, a[i].firstname, a[i].lastname, &a[i].balance);
+			fprintf(fp1, "%d %s %s %.2f\n", a[i].code, a[i].firstname, a[i].lastname, a[i].balance);
+			i++;
+			printf("Continuare? [s/n]: ");
+			fflush(stdin);
+			scanf("%c", &c);
+			}
+    printf("\nDati scritti correttamente su file.\n\n");
+    fclose(fp1);
+    n=readData(a);
+	}
+}
+
+/* // variante che lascia scegliere all'utente come aprire il file
+	char mode[2];
+	printf("Selezionare il modo di apertura del file [w/a]:\n"
+	"(w = write,  a = append)   --->   ");
+	fflush(stdin);
+	scanf("%s", &mode);
+	if( (fp1=fopen("a_data.txt", mode) ) == NULL) {
+		printf("error opening file!\n");
+	}
+*/
+
+int readData(account a[]){
+	int i;
+	FILE *fp1;
+	if( (fp1=fopen("account_data.txt", "r") ) == NULL) {
+		printf("Errore nell'apertura del file o file non presente.\n");
+	}
+	else{
+		i=0;
+		while (!ferror(fp1)){
+			fscanf(fp1, "%d %s %s %f", &a[i].code, a[i].firstname, a[i].lastname, &a[i].balance);
+			if (feof(fp1))
+			break;
+			i++;
+		}
+	fclose(fp1);
+	}
+	return i;
+}
+
+/*
+void testFunction(account a[]){
+	int i;
+	printf("select 'i' value: ");
+	scanf("%d", &i);
+	printf("%4d    %-15s     %6.2f\n", a[i].code, a[i].name, a[i].balance);
+}*/
+
+void ricerca(account a[], int dim){
+	char filename [35];
+	int i;
+	int k=0;
+	char h='n';
+	float min;
+	printf("Inserisci il valore minimo di bilancio da cui visualizzare: ");
+	scanf("%f", &min);
+	printf("%-8s%-20s%-20s%-20s%\n", "CODE", "FIRST NAME", "LAST NAME", "BALANCE");
+	for (i=0;i<dim;i++){
+		if (a[i].balance>=min){
+			printf("%4d    %-15s     %-15s     %6.2f\n", a[i].code, a[i].firstname, a[i].lastname, a[i].balance);
+			k++;
+		};
+	}
+	if (k==0)
+	printf("    (Nessun elemento trovato)\n");
+	else if (k==1)
+	printf("    (1 elemento trovato)\n");
+	else
+	printf("    (%d elementi trovati)\n", k);
+	if(k>0){
+		printf("Vuoi salvare i risultati della ricerca su un nuovo file? [s/n] --> ");
+		fflush(stdin);
+		scanf("%c", &h);
+		if ((h=='s') || (h=='S')){
+			FILE *fp4;
+			printf("Scegli il nome da dare al file (max 30 caratteri e senza estensione): --> ");
+			scanf("%s", filename);
+			fp4=fopen(strcat(filename, ".txt"), "w");
+			for (i=0;i<dim;i++){
+				if (a[i].balance>=min){
+					fprintf(fp4, "%d %s %s %.2f\n", a[i].code, a[i].firstname, a[i].lastname, a[i].balance);
+					}
+			} 
+			printf("Dati scritti correttamente sul file %s\n\n", filename);
+			fclose(fp4);
+		}
+		else
+		printf("File non scritto.\n\n");
+	}
+}
+
+void ordinaVettore(account a[], int dim){
+    int i, j, code;
+    float bal;
+    char buffer1[20];
+    char buffer2[20];
+    for(i=0;i<dim;i++) //l'algoritmo usato per l'ordinamento è il bubble sort
+    {
+       for(j=i+1;j<dim;j++)
+       { //strcmp(str1, str2)
+           if( (a[i].balance>a[j].balance) || ( (a[i].balance==a[j].balance) && ((strcmp(a[i].lastname, a[j].lastname)>0)) ) || ( (a[i].balance==a[j].balance) && ((strcmp(a[i].lastname, a[j].lastname)==0)) && ((strcmp(a[i].firstname, a[j].firstname)>0)) ) )
+           {
+           	 code=a[j].code;
+             a[j].code=a[i].code;
+             a[i].code=code;
+             strcpy(buffer1,a[i].firstname); //per le stringhe non si usa l'operatore di assegnamento ma lo strcpy
+             strcpy(a[i].firstname,a[j].firstname);
+             strcpy(a[j].firstname,buffer1);
+             strcpy(buffer2,a[i].lastname);
+             strcpy(a[i].lastname,a[j].lastname);
+             strcpy(a[j].lastname,buffer2);
+             bal=a[j].balance;
+             a[j].balance=a[i].balance;
+             a[i].balance=bal;
+           }
+       }
+    }
+    printf("Array ordinato correttamente.\n");
+}
+
+void printArray(account a[], int dim){ //5. Visualizza l'array in memoria.
+	int i;
+	printf("Numero di elementi: %d.\n", dim);
+	printf("%-8s%-20s%-20s%-20s%\n", "CODE", "FIRST NAME", "LAST NAME", "BALANCE");
+	for (i=0;i<dim;i++){
+		printf("%4d    %-15s     %-15s     %6.2f\n", a[i].code, a[i].firstname, a[i].lastname, a[i].balance);
+	}
+	printf("\n");	
+}
+
+void saveArray(account a[], int dim){
+	int i;
+	char filename [35];
+	printf("Scegli il nome da dare al file (max 30 caratteri e senza estensione): --> ");
+	fflush(stdin);
+	scanf("%s", filename);
+	FILE *fp2;
+	if( (fp2=fopen(strcat(filename, ".txt"), "w") ) == NULL) {
+		printf("Errore nell'apertura del file.\n");
+	}
+	else{
+		i=0;
+		printf("Numero di elementi: %d\n", dim);
+		for (i=0;i<dim;i++){
+			fprintf(fp2, "%d %s %s %.2f\n", a[i].code, a[i].firstname, a[i].lastname,  a[i].balance);
+		}
+		fclose(fp2);
+	}
+	printf("Dati scritti correttamente sul file %s\n\n", filename);	
+}
+
+void elimina(account a[], int dim){
+	int elim;
+	int flag=0;
+	account el;
+	n=readData(a);
+	printArray(a, dim);
+	printf("Scrivi il codice dell'elemento da eliminare: ");
+	scanf("%d", &elim);
+	FILE *fp1;
+	if( (fp1=fopen("account_data.txt", "w") ) == NULL) {
+		printf("Errore nell'apertura del file.\n");
+	}
+	else{
+		int i=0;
+		for (i=0;i<dim;i++){
+			if (elim!=a[i].code)
+			fprintf(fp1, "%d %s %s %.2f\n", a[i].code, a[i].firstname, a[i].lastname, a[i].balance);
+			else
+			{
+			flag=1;
+			el.code=a[i].code;
+			strcpy(el.firstname, a[i].firstname);
+			strcpy(el.lastname, a[i].lastname);
+			el.balance=a[i].balance;
+			}
+		}
+		fclose(fp1);
+	}
+	n=readData(a);
+	if (flag==1)
+	{
+		printf("Il record con codice %d (%s %s, %.2f) \x8a stato eliminato.\n", elim, el.firstname, el.lastname, el.balance);
+		printf("File account_data.txt aggiornato correttamente.\n");	
+	}
+	else
+	printf("Nessun dato eliminato.\n"); //in realtà, array riscritto su file tale e quale a prima.
+}

@@ -1,0 +1,159 @@
+/*scrivere un programma in c che gestisce un testo composto
+da un elenco di frasi. il programma deve
+1.acquisizione da tastiera di un elenco di frasi avente dimensione non definita
+2.identificare le prime tre parole che compaiono con piu frequenza
+3.scrivere su file parole e conteggi del punto 2
+4.identificare i nomi e visualizzarli a console.
+Le funzionalità possono essere eseguite in sequenza.*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#define MAX 1000
+
+typedef struct{
+	char word [30];
+	int occ;
+} word_t;
+//trattiamo ogni singola parola come una variabile strutturata di tipo word_t e dichiariamo due array
+word_t p[MAX];
+word_t q[MAX];
+word_t parole[3];
+
+int acquisizione(int totParole);
+int occorrenza(int totParole, int netParole);
+void scritturaFile(); //non ancora definita
+
+int main(){
+	int tot=0; //numero totale lordo delle parole (con ripetizioni)
+	int net=0; //numero totale netto delle parole (senza ripetizioni)
+	tot=acquisizione(tot);
+	printf("\ntotale parole: %d\n\n", tot);
+	occorrenza(tot, net);
+	scritturaFile();
+	system("pause");
+	return 0;
+}
+
+int acquisizione(int totParole){
+	printf ("inserire testo (scrivere 000 per terminare)\n");
+	int i, j, c, d, nomi;
+	for(i=0;i<MAX;i++)
+	{
+		scanf ("%s", p[i].word);
+		for (c=0;c<30;c++)
+		{ //ciclo che scansiona i singoli caratteri della parola appena arrivata in input
+			for (c=0;c<30;c++)
+			if ( (ispunct(p[i].word[c])) && (p[i].word[c]!=39 ) && (p[i].word[c]!=45 ) && (c!=0) ) //relazione d'ordine
+			//39 è il codice ascii del singolo apice, 45 è il codice ascii del trattino (-)
+			p[i].word[c]='\0';
+			//sostituisce ogni segno di punteggiatura (tranne il singolo apice) con il carattere di terminazione
+			else if ((p[i].word[0]==40) || (p[i].word[0]==34))
+			//40 è il codice ascii della parentesi aperta, 34 è il codice ascii del doppio apice
+			{ //un ciclo nel ciclo per far scalare tutti gli elementi dell'array di char
+				for (d=0;d<30;d++){
+				p[i].word[d]=p[i].word[d+1];
+				p[i].word[d+1]=32; //32 è il codice ascii dello spazio bianco
+				}
+			}
+			if (p[i].word[c]==' ')
+			break;
+		}
+		if ( (p[i].word[0]=='0')&&(p[i].word[1]=='0')&&(p[i].word[2]=='0') ) break;
+	} //si ferma quando trova 000 o una parola che inizia con 000
+	printf ("\nnomi contenuti nel testo: ");
+		for (j=0;j<MAX;j++)
+	{
+		if (isupper(p[j].word[0])) //verifica se il primo carattere di una parola è una lettera maiuscola
+		nomi++; //se sì, incrementa il contatore dei nomi
+	}
+	printf("%d\n", nomi);
+	for (j=0;j<MAX;j++)
+	{
+		if (isupper(p[j].word[0])) //verifica se il primo carattere di una parola è una lettera maiuscola
+		printf ("%s  ", p[j].word); //se sì, stampa a video l'intera parola.
+	}
+	return i; //il valore di ritorno è il numero di parole trovate nel testo.
+}
+
+int occorrenza(int totParole, int netParole){
+	int i, j, k;
+	int flag=0;
+
+	parole[0].occ = 0;
+	parole[1].occ = 0;
+	parole[2].occ = 0;
+	strcmp (parole[0].word, "");
+	strcmp (parole[1].word, "");
+	strcmp (parole[2].word, "");
+//dichiarazione e inizializzazione di tutti i campi dell'array strutturato 'parole' di tipo word_t
+
+
+	for(i=0;i<totParole;i++){
+
+		flag=0;
+		for (j=0;j<totParole;j++){
+			if (strcmp(p[i].word, p[j].word)==0) //confronta i-esima parola con j-esima parola dell'input
+			{ //se sono uguali,incrementa il contatore delle occorrenze
+				p[i].occ++;
+		//		(strcpy(q[k].word ,p[i].word));
+				flag=1; //flag che non so come usare
+			}
+	/*		else if (strcmp(p[i].word, p[j].word)!=0)
+			(strcpy(q[k].word ,p[i].word));	*/
+		}
+		k++;
+	}
+
+
+	for (j=0; j < 3; j++){ //j = indice del nuovo array strutturato 'parole'
+		for (i=0; i < totParole; i++){
+			if ( (strcmp (parole[0].word, p[i].word) != 0) && (strcmp (parole[1].word, p[i].word) != 0) && (strcmp (parole[2].word, p[i].word) != 0)  ){
+				if (parole[j].occ < p[i].occ){
+					parole[j] = p[i];
+				}
+			}
+		}
+	}
+
+	for (i=0; i < 3; i++){
+		printf("%s  - %d volte\n", parole[i].word, parole[i].occ);
+	}
+
+	return 0;
+}
+
+void scritturaFile(){
+	char filename [35];
+	char risposta;
+	int i;
+	printf ("\nVuoi salvare i dati delle occorrenze su un file? [s/n]  -->  ");
+	fflush(stdin);
+	scanf("%c", &risposta);
+	if (risposta=='S' || risposta=='s'){
+		printf("Scegli il nome da dare al file [max 30 caratteri e senza estensione]: -->  ");
+		fflush(stdin);
+		scanf("%s", filename);
+		FILE *f;
+		f=fopen( strcat(filename,".txt"), "w" );
+		for (i=0; i<3; i++){
+			fprintf(f, "%s  - %d volte\n", parole[i].word, parole[i].occ);
+		} //end for
+	printf("Dati salvati correttamente sul file %s\n", filename);
+	} //end if risposta affermativa
+}
+
+
+
+/* testo input di esempio 1:
+
+al Cairo non lo sanno che ore sono adesso
+il sole sulla Rambla oggi non è lo stesso
+in Francia c'è un concerto, la gente si diverte
+qualcuno canta forte, qualcuno grida "a morte"
+a Londra piove sempre ma oggi non fa male
+il cielo non fa sconti neanche a un funerale
+a Nizza il mare è rosso di fuochi e di vergogna
+di gente sull'asfalto e sangue nella fogna
+*/

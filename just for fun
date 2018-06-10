@@ -1,0 +1,22 @@
+/* just for fun */
+#include <stdio.h>
+#include <stdlib.h>
+int main(){
+    int i;
+    int k;
+    for (i=0;i<2;i++){
+        printf("\nPsycho Killer, qu'est-ce que c'est?\n");
+        for (k=0;k<9;k++){
+           printf ("fa-");
+        }
+        printf("far better\n");
+        for (k=0;k<7;k++){
+            printf ("run ");
+        }
+        printf ("away, oh oh oh ");
+    }
+    printf ("oh\n");
+    printf ("ah yeah yeah yeah yeah uh\n\n\n");
+    system ("pause");
+    return 0;
+}

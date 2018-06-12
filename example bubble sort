@@ -30,4 +30,5 @@ void printarray(){
 	for (i=0;i<SIZE;i++){
 		printf("%d ", a[i]);
 	}
+	printf("\n");
 }

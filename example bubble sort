@@ -8,7 +8,7 @@ int a[SIZE]={54, 25, 44, 30, 77, 12, 22, 50, 32, 69};
 int main(){
 	bubblesort();
 	printarray();
-  system("pause");
+  	system("pause");
 	return 0;
 }
 

@@ -1,0 +1,158 @@
+/*
+ * Esercitazione 3-3.c
+ *
+ *  Created on: 12 giu 2018
+ *      Author: Antonio
+ */
+
+
+/* Scrivere un programma in C che fornisca le seguenti funzionalità,
+non necessariamente offerte da menù:
+1. Acquisire una sequenza di parole (la cui dimensione è scelta dall'utente)
+e memorizzarla in un file.
+2. Ordinare (in modo crescente) le parole e memorizzare l'ordine in un file.
+3. Verificare la presenza di parole palindrome e nel caso memorizzarle in un file.
+4. Verificare la presenza di consonanti doppie e vocali doppie e nel caso memorizzarle in un file.
+5. Visualizzare a console il contenuto dei file. */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#define MAX 1000
+
+typedef struct{
+	char parola [30];
+	int palindromo;
+	int doppie;
+} word;
+
+word w[MAX]; //array strutturato dichiarato come globale
+
+int acquisizione(int totParole);
+void ordinamento(int totParole);
+void controllaPalindromi(int totParole);
+int controllaDoppie(int totParole, int totDoppie);
+
+int main(){
+	int n;
+	int m;
+	n=acquisizione(n);
+	ordinamento(n);
+	controllaPalindromi(n);
+	m=controllaDoppie (n, m);
+	printf("\n\n");
+	system ("pause");
+	return 0;
+}
+
+int acquisizione(int totParole){
+	printf("inserire testo [scrivere ! per terminare]\n");
+	int i;
+	for (i=0;i<MAX;i++){
+		scanf("%s", w[i].parola);
+		if (w[i].parola[0]=='!')
+		break;
+	}
+	FILE *f1;
+	f1=fopen("1. testo acquisito.txt", "w");
+	for (i=0;i<MAX;i++){
+		if (w[i].parola[0]!='!')
+		fprintf(f1, "%s ", w[i].parola);
+		if (w[i].parola[0]=='!')
+		break;
+	}
+	fclose(f1);
+	printf("\n\n");
+	return i;
+}
+
+void ordinamento(int totParole){
+	int i, j;
+	word x; //variabile strutturata temporanea da usare per l'ordinamento
+	for (i=0;i<totParole;i++){ //l'algoritmo usato per l'ordinamento è il bubble sort.
+		for (j=0;j<totParole;j++){
+			if ( strcmp(w[i].parola, w[j].parola)<0 ){
+				x=w[j];
+				w[j]=w[i];
+				w[i]=x;
+			}
+		}
+	}
+	FILE *f2;
+	f2=fopen("2. testo ordinato.txt", "w");
+	printf("parole in ordine di grandezza:\n");
+	for (i=0;i<totParole;i++){
+		fprintf(f2, "%s ", w[i].parola);
+		printf("%s ", w[i].parola);
+	}
+	fclose(f2);
+	printf("\n\n");
+}
+
+void controllaPalindromi(int totParole){
+	int i, j, c, d;
+	j=0;
+	for (i=0;i<totParole;i++){
+		w[i].palindromo=1; //1=sì, 0=no
+		d=strlen(w[i].parola);
+		for(c=0; c<strlen(w[i].parola); c++) {//scansione di ogni parola lettera per lettera
+			d--;
+			if (w[i].parola[c]!=w[i].parola[d])
+			w[i].palindromo=0;
+		}// end for c
+	if (w[i].palindromo==1){
+		j++;
+		}
+	}//end for i
+	if (j==0)
+	printf ("nessuna parola palindroma!");
+	else{
+		FILE *f3;
+		f3=fopen("3. parole palindrome", "w");
+		printf("parole palindrome:\n");
+		for (i=0;i<totParole;i++){
+			if (w[i].palindromo==1){
+				fprintf(f3, "%s ", w[i].parola);
+				printf("%s ", w[i].parola);
+			}
+		}
+		fclose(f3);
+	}
+	printf("\n");
+}
+
+
+int controllaDoppie(int totParole, int totDoppie){
+	printf("\n");
+	int i, j, c;
+	j=0;
+	for (i=0;i<totParole;i++){
+		w[i].doppie=0;
+		for(c=0;c<30;c++){//scansione di ogni parola lettera per lettera
+			if (w[i].parola[c]==w[i].parola[c-1])
+			{
+				w[i].doppie++;
+				j++;
+			}
+			if (w[i].parola[c]=='\0')
+			break;
+		}
+	}
+	if (j==0)
+	printf("nessuna parola con lettere doppie!\n");
+	else{
+		FILE *f4;
+		printf("parole con lettere doppie:\n");
+		f4=fopen("4. doppie nel testo.txt", "w");
+		for (i=0;i<totParole;i++){
+			if (w[i].doppie>0){
+				fprintf(f4, "%s ", w[i].parola);
+				printf("%s ", w[i].parola);
+			}
+		}
+		fclose(f4);
+	}
+	printf ("\n");
+	return j;
+}

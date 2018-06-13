@@ -1,0 +1,110 @@
+/* Scrivere un programma in C che fornisca le seguenti funzionalità:
+1. acquisire una sequenza di numeri interi (la cui dimensione è scelta dall'utente) e memorizzarla in un file
+2. ordinare (in modo crescente) la sequenza e memorizzarla in un secondo file
+3. scrivere in un terzo file gli elementi della sequenza che sono maggiori di un valore inserito da utente
+4. visualizzare a console il contenuto dei tre file. */
+#include <stdio.h>
+#include <stdlib.h>
+#define MAX 100
+int acquisizione(int dim);
+void ordinamento (int dim);
+int maggioridi (int dim);
+int visualizza (int dim);
+
+int a[MAX];
+
+int main(){
+	int n;
+	n=acquisizione(n);
+	ordinamento(n);
+	maggioridi(n);
+	visualizza(n);
+	printf("\n\n");
+	system ("pause");
+	return 0;
+}
+
+int acquisizione(int dim){
+	int i;
+	printf ("Quanti numeri vuoi inserire? ");
+	scanf ("%d", &dim);
+	FILE *f1;
+	f1=fopen("File1.txt", "w");
+	for (i=0;i<dim;i++){
+		printf ("Inserisci il %d^ numero: ", i+1);
+		scanf ("%d", &a[i]);
+		fprintf(f1, "%d ", a[i]);
+	}
+	fclose(f1);
+	printf("Numeri acquisiti correttamente su File1.txt\n");
+	return i;
+}
+
+void ordinamento(int dim){
+	int i, j, app;
+	for (i=1;i<dim;i++){
+		app=a[i];
+		j=i-1;
+		while(j>=0 && a[j]>app){
+			a[j+1]=a[j];
+			j--;
+		}
+		a[j+1]=app;
+	}
+	FILE *f2;
+	f2=fopen("File2.txt", "w");
+	for (i=0;i<dim;i++){
+		fprintf(f2, "%d ", a[i]);
+	}
+	fclose(f2);
+	printf("Numeri ordinati correttamente su File2.txt\n");
+}
+
+int maggioridi (int dim){
+	int i, x;
+	printf("Inserisci il numero del quale visualizzare i numeri maggiori:  ");
+	scanf("%d", &x);
+	FILE *f3;
+	f3=fopen("File3.txt", "w");
+	for (i=0;i<dim;i++){
+		if (a[i]>x)
+		fprintf(f3, "%d ", a[i]);
+	}
+	fclose(f3);
+	printf("Numeri maggiori di %d memorizzati correttamente su File3.txt\n", x);
+	return x;
+}
+
+int visualizza (int dim){
+	int i;
+	FILE *f1;
+	f1=fopen("File1.txt", "r");
+	i=0;
+	printf("Contenuto del File1.txt:  ");
+	while (!feof(f1)){
+		fscanf(f1, "%d ", &a[i]);
+		printf("%d ", a[i]);
+	}
+	fclose(f1);
+	printf("\n");
+	FILE *f2;
+	f2=fopen("File2.txt", "r");
+	i=0;
+	printf("Contenuto del File2.txt:  ");
+		while (!feof(f2)){
+		fscanf(f2, "%d ", &a[i]);
+		printf("%d ", a[i]);
+	}
+	fclose(f2);
+	printf("\n");
+	FILE *f3;
+	f3=fopen("File3.txt", "r");
+	i=0;
+	printf("Contenuto del File3.txt:  ");
+		while (!feof(f3)){
+		fscanf(f3, "%d ", &a[i]);
+		printf("%d ", a[i]);
+	}
+	fclose(f3);
+	printf("\n");
+}

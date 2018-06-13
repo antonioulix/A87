@@ -1,0 +1,37 @@
+/* selection sort */
+#include <stdio.h>
+#include <stdlib.h>
+#define SIZE 10
+void selectionsort();
+void printarray();
+int a[SIZE]={54, 25, 44, 30, 77, 12, 22, 50, 32, 69};
+int main(){
+	selectionsort();
+	printarray();
+	system("pause");
+	return 0;
+}
+
+void selectionsort(){
+	int i, j, min=0, mix;
+	for (i=0;i<SIZE-1;i++){
+		min=a[i];
+		mix=i;
+		for (j=i+1;j<SIZE;j++){
+			if (a[j]<min){
+				min=a[j];
+				mix=j;
+			}
+		}
+		a[mix]=a[i];
+		a[i]=min;
+	}
+}
+
+void printarray(){
+	int i;
+	for (i=0;i<SIZE;i++){
+		printf("%d ", a[i]);
+	}
+	printf("\n");
+}

@@ -1,0 +1,292 @@
+/*
+ * es_parcheggio.c
+ *
+ *  Created on: 24 lug 2018
+ *      Author: Antonio Ulix
+ */
+
+
+/*
+Scrivere un programma in C in grado di fornire le seguenti funzionalità
+di un Parcheggio per Auto offerte da menù utente:
+1. Acquisizione di una collezione di dati di autovetture da file
+La collezione si riferisce ad autovetture già parcheggiate.
+2. Aggiornamento della collezione con calcolo del costo del parcheggio
+sulla base dell'orario fornito in input.
+La tariffa è di 1 euro ogni 60 minuti.
+L'orario di uscita dev'essere fornito in input in formato di ora (es. 11:00).
+3. Messa in uscita di un'autovettura (fornita in input) con visualizzazione
+del costo del parcheggio.
+L'uscita prevede la rimozione dell'auto dalla collezione.
+4. Selezione delle autovetture che stanno nel parcheggio da più di 6 ore e
+ordinamento di esse sulla base del costo.
+Le auto ordinate dovranno essere memorizzate su un file e visualizzate a console.
+Lo studente può scegliere autonomamente quale algoritmo di ordinamento usare.
+*/
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define MAX 100
+
+typedef struct{
+	int ore;
+	int minuti;
+} orario;
+
+typedef struct{
+	char marca [10];
+	char modello [10];
+	char cilindrata [10];
+	char colore [10];
+	orario orarioingresso;
+	orario orariouscita;
+	int idposto;
+	float costoparcheggio;
+} autovettura;
+
+autovettura av [MAX];
+int n;
+int i;
+
+void printmenu();
+float calcolacosto (autovettura au[i]);
+int acquisizioneDaFile(autovettura au[MAX]);
+void printarray(autovettura au[MAX], int dim);
+int aggiornamento (autovettura au[MAX], int dim);
+int elimina (autovettura au[MAX], int dim);
+int ordinamento (autovettura au[MAX], int dim);
+
+int main(){
+	printf ("*** programma per la gestione di un parcheggio ***\n");
+	n=acquisizioneDaFile(av);
+	int scelta=32;
+	printmenu ();
+	while (scelta!=0){
+		printf("\nselezionare l'operazione da effettuare  -->  ");
+		scanf ("%d", &scelta);
+		fflush(stdin);
+		switch(scelta){
+			case 0:
+			printf("exit\n");
+			break;
+			case 1:
+			n=acquisizioneDaFile(av);
+			printarray(av, n);
+			break;
+			case 2:
+			aggiornamento(av, n);
+			break;
+			case 3:
+			elimina (av, n);
+			break;
+			case 4:
+			ordinamento (av, n);
+			break;
+			case 7:
+			printf("n == %d\n", n);
+			break;
+			case 8:
+			if (n>0)
+			printarray(av, n);
+			else
+			printf("\n");
+			break;
+			case 9:
+			printmenu ();
+			break;
+			default:
+			printf("operazione non valida!\n");
+			break;
+		}
+	}
+	system("pause");
+	return 0;
+}
+
+void printmenu(){
+	printf ("*** MENU ***\n"
+	"1. acquisizione dati delle autovetture da file\n"
+	"2. aggiunta  auto e calcolo costo del parcheggio\n"
+	"3. rimozione auto e calcolo costo del parcheggio\n"
+	"4. visualizzazione auto parcheggiate da piu' di 6 ore\n"
+	"0. uscita dal programma\n");
+}
+
+float calcolacosto (autovettura au[i]){
+	float e;
+	{
+	if (au[i].orarioingresso.minuti<=au[i].orariouscita.minuti)
+	e=au[i].orariouscita.ore-au[i].orarioingresso.ore;
+	else
+	e=au[i].orariouscita.ore-au[i].orarioingresso.ore-1;
+	}
+	return e;
+}
+
+int acquisizioneDaFile(autovettura au[MAX]){
+	FILE *fp1; // @suppress("Type cannot be resolved")
+	if( (fp1=fopen("parcheggio.txt", "r") ) == NULL) {
+		printf("errore nell'apertura del file o file non presente.\n");
+	}
+	else{
+		i=0;
+		while (!ferror(fp1)){
+			fscanf(fp1, "%s %s %s %s %d:%d %d:%d %d", au[i].marca, au[i].modello, au[i].cilindrata, au[i].colore, &au[i].orarioingresso.ore, &au[i].orarioingresso.minuti, &au[i].orariouscita.ore, &au[i].orariouscita.minuti, &au[i].idposto);
+			if (feof(fp1))
+			break;
+			i++;
+		}//end while
+	fclose(fp1);
+	}
+	return i;
+}
+
+void printarray(autovettura au[MAX], int dim){//la funzione,oltre a stampare l'array,calcola il costo dei parcheggi
+	FILE *fp1; //l'aggiunta della seguente condizione si è rivelata necessaria per sistemare un bug
+	if( (fp1=fopen("parcheggio.txt", "r") ) != NULL){
+	printf("MARCA     MODELLO   CILINDRATA COLORE     INGRESSO USCITA   POSTO\n");
+	for (i=0;i<dim;i++){
+		printf("%-10s%-10s%-11s%-10s %02d:%02d    %02d:%02d %6d\n", av[i].marca, av[i].modello, av[i].cilindrata, av[i].colore, av[i].orarioingresso.ore, av[i].orarioingresso.minuti, av[i].orariouscita.ore, av[i].orariouscita.minuti, av[i].idposto);
+		av[i].costoparcheggio=calcolacosto(av);
+	//	printf("costo: %.2f \n", av[i].costoparcheggio);
+		}
+	fclose(fp1);
+	}
+	else
+	printf("\n");
+}
+
+int aggiornamento (autovettura au[MAX], int dim){
+	FILE *fp1;
+	if( (fp1=fopen("parcheggio.txt", "a") ) ==NULL){
+		printf("errore nell'apertura del file o file non presente.\n");
+	}
+	else{
+		int i=n;
+		char c='s';
+		while ((c!='n') && (c!='N')){
+			printf("inserire marca e modello dell'auto parcheggiata separati da spazio (es. audi a4)\n");
+			scanf("%s" "%s", au[i].marca, au[i].modello);
+			printf("inserire cilindrata dell'auto\n");
+			scanf("%s", au[i].cilindrata);
+			printf("inserire colore dell'auto\n");
+			scanf("%s", au[i].colore);
+			printf("inserire orario di ingresso nel formato hh:mm (es. 17:30)\n");
+			scanf("%d:%d", &au[i].orarioingresso.ore, &au[i].orarioingresso.minuti);
+			printf("inserire orario di uscita nel formato hh:mm (es. 18:30)\n");
+			scanf("%d:%d", &au[i].orariouscita.ore, &au[i].orariouscita.minuti);
+			printf("inserire numero di posto del parcheggio\n");
+			scanf("%d", &au[i].idposto);
+			fprintf(fp1, "%s %s %s %s %02d:%02d %02d:%02d %d\n", au[i].marca, au[i].modello, au[i].cilindrata, au[i].colore, au[i].orarioingresso.ore, au[i].orarioingresso.minuti, au[i].orariouscita.ore, au[i].orariouscita.minuti, au[i].idposto);
+			au[i].costoparcheggio=calcolacosto(av);
+			fclose(fp1);
+			fopen("parcheggio.txt", "a");
+			n=acquisizioneDaFile(av);
+			printf("costo del parcheggio: %.2f euro.\n", au[i].costoparcheggio);
+			printf("continuare? [s/n]: ");
+			fflush(stdin);
+			scanf("%c", &c);
+			i++;
+		}
+	printf("\ndati aggiornati correttamente\n\n");
+    fclose(fp1);
+	}
+	n=acquisizioneDaFile(av);
+	return n;
+}
+
+int elimina (autovettura au[MAX], int dim){
+	float e;
+	int elim;
+	int flag=0;//flag che indica se l'elemento da eliminare è stato trovato o no
+	autovettura el;//variabile strutturata temporanea
+	n=acquisizioneDaFile(av);
+	printf ("digitare il numero del parcheggio dell'autovettura in uscita --> ");
+	scanf("%d", &elim);
+	FILE *fp1;
+		if( (fp1=fopen("parcheggio.txt", "w") ) ==NULL){
+		printf("errore nell'apertura del file o file non presente.\n");
+	}
+	else{
+		int i;
+		for (i=0;i<dim;i++){//ciclo che scansiona il file alla ricerca dell'elemento da eliminare
+			if(elim!=au[i].idposto){
+			fprintf(fp1, "%s %s %s %s %02d:%02d %02d:%02d %d\n", au[i].marca, au[i].modello, au[i].cilindrata, au[i].colore, au[i].orarioingresso.ore, au[i].orarioingresso.minuti, au[i].orariouscita.ore, au[i].orariouscita.minuti, au[i].idposto);
+			}
+			else{
+				flag=1;
+				el=au[i];/*salva l'auto da eliminare nella variabile strutturata temporanea
+						   allo scopo di visualizzarne i dati e calcolarne il costo della sosta.*/
+			}
+		}
+		fclose(fp1);
+	}
+	n=acquisizioneDaFile(av);
+	if(flag==1){
+		{
+		if (el.orarioingresso.minuti<=el.orariouscita.minuti)
+		e=el.orariouscita.ore-el.orarioingresso.ore;
+		else
+		e=el.orariouscita.ore-el.orarioingresso.ore-1;
+		}
+		printf("posto %d lasciato libero ", elim);
+		printf("dall'autovettura %s %s di cilindrata %s\n", el.marca, el.modello, el.cilindrata);
+		printf("sosta effettuata dalle %02d:%02d alle %02d:%02d.\n", el.orarioingresso.ore, el.orarioingresso.minuti, el.orariouscita.ore, el.orariouscita.minuti);
+		printf("costo parcheggio: %.2f euro.\n", e);
+	}
+	else if (flag==0)
+	printf("il posto selezionato e' gia' libero, nessun dato eliminato.\n");
+	return n;
+}
+
+int ordinamento (autovettura au[MAX], int dim){//selezione e ordinamento
+	int k=0;
+	autovettura az[MAX];//array strutturato locale per la selezione
+	for (i=0;i<dim;i++){
+		if(au[i].costoparcheggio>=6){
+			az[k]=au[i];
+			k++;
+		}
+	}
+	if(k>0){
+		int i, j;
+		autovettura app;//variabile strutturata d'appoggio per l'ordinamento
+		for (i=1;i<k;i++){//l'algoritmo utilizzato per l'ordinamento è l'insertion sort
+			app=az[i];
+			j=i-1;
+			while(j>=0 && az[j].costoparcheggio>app.costoparcheggio){
+				az[j+1]=az[j];
+				j--;
+			}
+			az[j+1]=app;
+		}
+		printf("MARCA     MODELLO   CILINDRATA COLORE     INGRESSO USCITA   POSTO   COSTO PARCHEGGIO\n");
+		for (i=0;i<k;i++){
+			printf("%-10s%-10s%-11s%-10s %02d:%02d    %02d:%02d %6d        %.2f\n", az[i].marca, az[i].modello, az[i].cilindrata, az[i].colore, az[i].orarioingresso.ore, az[i].orarioingresso.minuti, az[i].orariouscita.ore, az[i].orariouscita.minuti, az[i].idposto, az[i].costoparcheggio);
+		}
+		char c='n';
+		printf("memorizzare queste informazioni su file? [s/n]  -->  ");
+		scanf("%c", &c);
+		if (c=='s' || c=='S'){
+			FILE *fp0;
+			char filename [35];
+			printf("scegliere il nome da dare al file: -->  ");
+			scanf("%s", filename);
+			fp0=fopen( strcat(filename,".txt") , "w");
+			for (i=0;i<k;i++){
+				fprintf(fp0, "%s %s %s %s %02d:%02d %02d:%02d %d %.2f\n", az[i].marca, az[i].modello, az[i].cilindrata, az[i].colore, az[i].orarioingresso.ore, az[i].orarioingresso.minuti, az[i].orariouscita.ore, az[i].orariouscita.minuti, az[i].idposto, az[i].costoparcheggio);
+			}
+			printf("i dati relativi alle auto parcheggiate da piu' di 6 ore sono stati salvati sul file %s\n", filename);
+		}
+	}
+	else
+	printf("nessuna automobile parcheggiata da piu' di 6 ore.\n");
+	return k;
+}
+
+/* file di esempio: "parcheggio.txt"
+alfa romeo 1500 nero 07:30 10:15 1
+audi a4 2000 nero 13:00 21:40 4
+audi q7 1234 blu 19:30 21:25 5
+ford fiesta 2000 nero 13:05 19:30 6
+*/

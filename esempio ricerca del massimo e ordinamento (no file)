@@ -1,0 +1,80 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define MAX 100
+
+/*Programma di esempio di ordinamento e ricerca del massimo e del minimo.*/
+
+typedef struct{
+	char name[30];
+	int age;
+} person;
+int n;
+person a [MAX];
+
+void insertArray(int *size);
+void maximum (int *size);
+void minimum (int *size);
+void insertionSort (int *size);
+void printArray (int *size);
+
+int main(){
+	insertArray(&n);
+	maximum(&n);
+	minimum(&n);
+	insertionSort(&n);
+	printArray(&n);
+	system ("pause");
+	return 0;
+}
+
+void insertArray(int *size){
+	int i;
+	printf ("Enter number of people: ");
+	scanf ("%d", &n);
+	for (i=0;i<n;i++){
+		printf ("Enter name and age of person %d --> ", i+1);
+		scanf ("%s" "%d", a[i].name, &a[i].age);
+	}
+}
+
+void maximum (int *size){
+	int i;
+	person max;
+	for (i=0;i<n;i++){
+		if (a[i].age>max.age)
+		max=a[i];
+	}
+	printf ("Oldest person is %s, age %d.\n", max.name, max.age);
+}
+
+void minimum (int *size){
+	int i;
+	person min;
+	for (i=0;i<n;i++){
+		if (a[i].age<min.age)
+		min=a[i];
+	}
+	printf ("Youngest person is %s, age %d.\n", min.name, min.age);
+}
+
+void insertionSort(int *size){
+	int i, j;
+	person t;
+	for (i=1;i<n;i++){
+		t=a[i];
+		j=i-1;
+		while (j>=0 && a[j].age>t.age){
+			a[j+1]=a[j];
+			j--;
+		}
+		a[j+1]=t;
+	}
+}
+
+void printArray (int *size){
+	int i;
+	for (i=0;i<n;i++){
+		printf ("%d: %s, age %d.\n", i+1, a[i].name, a[i].age);
+	}
+}
